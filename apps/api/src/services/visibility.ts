@@ -1,0 +1,2 @@
+import { UserModel } from "../models/index.js";
+export async function incidentVisibility(userId: string, roles: string[]): Promise<Record<string, unknown>> { if (roles.includes("administrator")) return {}; const user = await UserModel.findById(userId).select("allowedAssignmentGroupIds").lean() as unknown as { allowedAssignmentGroupIds?: string[] } | null; const groups = user?.allowedAssignmentGroupIds ?? []; return groups.length ? { "assignmentGroup.sysId": { $in: groups } } : {}; }

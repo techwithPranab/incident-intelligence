@@ -1,0 +1,1 @@
+import { ComingSoon } from "@/components/coming-soon"; export default function Page(){return <ComingSoon title="Sync history" description="Monitor full and incremental synchronization runs and recover failed records."/>}

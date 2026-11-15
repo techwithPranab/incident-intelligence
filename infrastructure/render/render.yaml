@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: incident-intelligence-api
+    runtime: node
+    buildCommand: npm ci && npm run build -w @incident-intelligence/api
+    startCommand: npm run start -w @incident-intelligence/api
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+  - type: worker
+    name: incident-intelligence-sync
+    runtime: node
+    buildCommand: npm ci && npm run build -w @incident-intelligence/sync-worker
+    startCommand: npm run start -w @incident-intelligence/sync-worker

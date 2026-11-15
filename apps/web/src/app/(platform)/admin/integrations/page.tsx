@@ -1,0 +1,1 @@
+import { ComingSoon } from "@/components/coming-soon"; export default function Page(){return <ComingSoon title="Integrations" description="ServiceNow OAuth, configurable mappings, and AI provider settings."/>}

@@ -1,0 +1,10 @@
+import { z } from "zod";
+export const classificationSchema = z.object({ recommendedCategory: z.string().min(1), recommendedSubcategory: z.string().min(1), explanation: z.string().min(1), confidence: z.number().min(0).max(1) });
+export const priorityRecommendationSchema = z.object({ suggestedImpact: z.number().int().min(1).max(3), suggestedUrgency: z.number().int().min(1).max(3), explanation: z.string().min(1) });
+export const evidenceCitationSchema = z.object({ sourceType: z.enum(["incident", "knowledge_article"]), sourceId: z.string().min(1), claim: z.string().min(1) });
+export const rootCauseSchema = z.object({ facts: z.array(z.string()), hypotheses: z.array(z.object({ rootCause: z.string().min(1), rationale: z.string().min(1), confidence: z.number().min(0).max(1), evidenceSourceIds: z.array(z.string()) })), troubleshootingSteps: z.array(z.string()), possibleResolutions: z.array(z.object({ resolution: z.string().min(1), evidenceSourceIds: z.array(z.string()) })), citations: z.array(evidenceCitationSchema), summary: z.string().min(1) });
+export const assistantAnswerSchema = z.object({ answer: z.string().min(1), citations: z.array(evidenceCitationSchema), followUpSuggestions: z.array(z.string()).max(4) });
+export type ClassificationOutput = z.infer<typeof classificationSchema>;
+export type RootCauseOutput = z.infer<typeof rootCauseSchema>;
+export type PriorityRecommendationOutput = z.infer<typeof priorityRecommendationSchema>;
+export type AssistantAnswer = z.infer<typeof assistantAnswerSchema>;

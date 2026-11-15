@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { z } from "zod";
+import { authenticate } from "../middleware/auth.js";
+import { ApiError } from "../middleware/error.js";
+import { getIncident, listIncidents } from "../services/incidents.js";
+import { findSimilarIncidents } from "../services/ai-analysis.js";
+import { getAiProvider } from "../services/ai-provider.js";
+import { IncidentAiAnalysisModel, IncidentModel } from "../models/index.js";
+export const incidentsRouter = Router(); incidentsRouter.use(authenticate);
+incidentsRouter.get("/", async (req, res, next) => { try { const query = z.object({ search: z.string().trim().max(200).optional(), category: z.string().max(100).optional(), priority: z.coerce.number().int().min(1).max(5).optional(), assignmentGroup: z.string().max(200).optional(), state: z.string().max(50).optional(), from: z.string().date().transform((value) => new Date(`${value}T00:00:00.000Z`)).optional(), to: z.string().date().transform((value) => new Date(`${value}T23:59:59.999Z`)).optional(), page: z.coerce.number().int().min(1).default(1), limit: z.coerce.number().int().min(1).max(100).default(25), sort: z.enum(["openedAt", "sourceUpdatedAt", "priority", "number"]).default("openedAt"), order: z.enum(["asc", "desc"]).default("desc") }).parse(req.query); res.json(await listIncidents(query)); } catch (error) { next(error); } });
+incidentsRouter.get("/:id/similar", async (req, res, next) => { try { const id = z.string().min(1).max(100).parse(req.params.id); const { limit } = z.object({ limit: z.coerce.number().int().min(1).max(20).default(5) }).parse(req.query); res.json(await findSimilarIncidents(id, getAiProvider(), req.auth!.roles, limit)); } catch (error) { next(error); } });
+incidentsRouter.get("/:id/analysis", async (req, res, next) => { try { const id = z.string().min(1).max(100).parse(req.params.id); const incident = await IncidentModel.findOne({ $or: [{ number: id.toUpperCase() }, { sourceSysId: id }] }).select("_id").lean() as unknown as { _id: unknown } | null; if (!incident) throw new ApiError(404, "INCIDENT_NOT_FOUND", "Incident was not found"); const items = await IncidentAiAnalysisModel.find({ incidentId: incident._id }).sort({ createdAt: -1 }).select("-__v").lean(); res.json({ items }); } catch (error) { next(error); } });
+incidentsRouter.get("/:id", async (req, res, next) => { try { const result = await getIncident(z.string().min(1).max(100).parse(req.params.id)); if (!result) throw new ApiError(404, "INCIDENT_NOT_FOUND", "Incident was not found"); res.json(result); } catch (error) { next(error); } });

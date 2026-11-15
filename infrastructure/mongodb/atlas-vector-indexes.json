@@ -1,0 +1,23 @@
+[
+  {
+    "collection": "incidentembeddings",
+    "name": "incident_embedding_vector",
+    "definition": {
+      "fields": [
+        { "type": "vector", "path": "vector", "numDimensions": 1536, "similarity": "cosine" },
+        { "type": "filter", "path": "metadata.allowedRoles" },
+        { "type": "filter", "path": "metadata.category" }
+      ]
+    }
+  },
+  {
+    "collection": "knowledgeembeddings",
+    "name": "knowledge_embedding_vector",
+    "definition": {
+      "fields": [
+        { "type": "vector", "path": "vector", "numDimensions": 1536, "similarity": "cosine" },
+        { "type": "filter", "path": "metadata.allowedRoles" }
+      ]
+    }
+  }
+]

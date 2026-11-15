@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { z } from "zod";
+import { authenticate } from "../middleware/auth.js";
+import { overviewAnalytics, trendAnalytics } from "../services/analytics.js";
+import { slaAnalytics } from "../services/sla.js";
+import { incidentVisibility } from "../services/visibility.js";
+export const analyticsRouter = Router(); analyticsRouter.use(authenticate);
+analyticsRouter.get("/overview", async (_req, res, next) => { try { res.json(await overviewAnalytics()); } catch (error) { next(error); } });
+analyticsRouter.get("/trends", async (req, res, next) => { try { const { days } = z.object({ days: z.coerce.number().int().min(7).max(365).default(30) }).parse(req.query); res.json({ days, items: await trendAnalytics(days) }); } catch (error) { next(error); } });
+analyticsRouter.get("/sla", async (req, res, next) => { try { res.json(await slaAnalytics(await incidentVisibility(req.auth!.userId, req.auth!.roles))); } catch (error) { next(error); } });
